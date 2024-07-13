@@ -1,0 +1,9 @@
+__pycache__
+data_handle/results/*
+results_no_trans
+results_trans
+trained_model/*
+
+*.ipynb
+*.npz
+*.pth
