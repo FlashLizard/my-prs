@@ -34,7 +34,7 @@ if __name__ == '__main__':
     
     epochs = 200
     min_epoch = 0
-    min_loss = 1000000
+    min_loss = 1000000000000
     
     for epoch in range(epochs):
         model.train()
