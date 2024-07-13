@@ -2,7 +2,7 @@ import torch
 from data_handle.prs_dataset import PrsDataSet
 from torch.utils.data import DataLoader
 import argparse
-from model.prs_loss  import sym_plane_tran,PrsLoss
+from model.prs_loss  import sym_plane_tran,SymPlaneLoss
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -23,7 +23,7 @@ if __name__ == '__main__':
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     dataset = PrsDataSet(data_path, device)
     print('len',len(dataset))
-    test_loader = DataLoader(dataset, batch_size=32, shuffle=True)
+    test_loader = DataLoader(dataset, batch_size=1, shuffle=True)
     
     model = torch.load(path)
     
@@ -45,7 +45,7 @@ if __name__ == '__main__':
         
         ax.scatter(sp[...,0],sp[...,1],sp[...,2])
         tps = sym_plane_tran(sps,planes).cpu()
-        loss = PrsLoss()
+        loss = SymPlaneLoss()
         
         id=0
         for A,B,C,D in plane:
@@ -69,9 +69,8 @@ if __name__ == '__main__':
             ax.scatter(tps[0,id,:,0],tps[0,id,:,1],tps[0,id,:,2], alpha=0.1)
             loss_v = loss(voxels[0].unsqueeze(0),
                           sps[0].unsqueeze(0),
-                          cps[0].unsqueeze(0),
-                          planes[0,id].unsqueeze(0).unsqueeze(0),
-                          0
+                          cps[0].unsqueeze(0).view(1,-1,3),
+                          planes[0,id].unsqueeze(0).unsqueeze(0)
                           )
             print(loss_v)
             id += 1

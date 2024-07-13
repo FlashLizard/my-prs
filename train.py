@@ -32,7 +32,7 @@ if __name__ == '__main__':
     loss = PrsLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
     
-    epochs = 300
+    epochs = 200
     min_epoch = 0
     min_loss = 1000000
     
