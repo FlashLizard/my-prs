@@ -7,3 +7,6 @@ trained_model/*
 *.ipynb
 *.npz
 *.pth
+
+!data_handle/results/output0.npz
+!trained_model/model0.pth
