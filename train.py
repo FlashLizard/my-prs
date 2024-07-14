@@ -28,15 +28,15 @@ if __name__ == '__main__':
     if(begin_epoch==0):
         model = PrsModel().to(device)
     else:
-        model = torch.load('trained_model/model{begin_epoch}.pth')
+        model = torch.load(f'trained_model/model{begin_epoch}.pth')
     loss = PrsLoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.1)
     
-    epochs = 200
+    epochs = 500
     min_epoch = 0
     min_loss = 1000000000000
     
-    for epoch in range(epochs):
+    for epoch in range(begin_epoch,epochs):
         model.train()
         for i, (voxels, sps, cps) in enumerate(train_loader):
             voxels_u = voxels.unsqueeze(1)
@@ -50,6 +50,8 @@ if __name__ == '__main__':
             # print(voxels.shape,sps.shape,cps.shape, planes.shape, quads.shape)
             
             loss_value = loss(voxels, sps, cps, planes, quads)
+            # l2_norm = sum(p.pow(2.0).sum() for p in model.parameters())
+            # loss_value += l2_norm
             loss_value.backward()
             optimizer.step()
             # print(f'epoch{epoch} step{i}', loss_value)
@@ -69,7 +71,7 @@ if __name__ == '__main__':
         if(min_loss>loss_value):
             min_loss = loss_value
             min_epoch = epoch
-        print(f'epoch{epoch} loss', loss_value)
+        print(f'epoch{epoch} loss', loss_value/test_size)
     
     print(f'min_epoch{min_epoch}, loss{min_loss}')
         

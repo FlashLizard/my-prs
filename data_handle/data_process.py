@@ -29,7 +29,7 @@ def get_closet_points(points, mesh):
     scene = o3d.t.geometry.RaycastingScene()
     scene.add_triangles(mesh)
     return scene.compute_closest_points(points)['points']
-print("??")
+
 if __name__ == '__main__':
     for arg in sys.argv:
         print(arg)
@@ -127,18 +127,9 @@ if __name__ == '__main__':
             try:
                 mesh = o3d.io.read_triangle_mesh(file_path)
                 angle = np.random.rand(3)*np.pi
-                # 旋转变换
-                R = mesh.get_rotation_matrix_from_xyz(angle)  # 45度绕x, y, z轴旋转
+                # rotate the mesh randomly
+                R = mesh.get_rotation_matrix_from_xyz(angle)
                 mesh.rotate(R, center=(0, 0, 0))
-
-                # # 平移变换
-                # T = np.eye(4)
-                # T[:3, 3] = [1, 2, 3]  # 平移向量 (1, 2, 3)
-                # mesh.transform(T)
-
-                # # 缩放变换
-                # mesh.scale(0.5, center=mesh.get_center())  # 缩放因子 0.5，以网格中心为缩放中心
-                
                 # Sample points
                 sample_points = mesh.sample_points_uniformly(number_of_points=sample_points_number)
                 sample_points_arr = np.asarray(sample_points.points)
@@ -148,8 +139,7 @@ if __name__ == '__main__':
                 model = np.zeros((voxel_resolution,voxel_resolution,voxel_resolution))
                 for v in voxel_grid_arr:
                     model[v[0]][v[1]][v[2]] = 1
-                # ??
-                # voxel_grid = (voxel_grid + 0.5)/voxel_resolution - 0.5
+
                 # Get Closet Points
                 closest_points = get_closet_points(regular_points, mesh).numpy()
                 

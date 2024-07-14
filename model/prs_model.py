@@ -2,9 +2,9 @@ import torch
 import numpy as np
 
 default_quad_bias = [
-    [0, 0, 0, np.sin(np.pi/2)],
-    [0, 0, np.sin(np.pi/2), 0],
-    [0, np.sin(np.pi/2), 0, 0]
+    [0, 0, 0, 1],
+    [0, 0, 1, 0],
+    [0, 1, 0, 0]
 ]
 default_plane_bias = [
     [0,0,1,0],
@@ -28,7 +28,7 @@ class PrsModel(torch.nn.Module):
             model.append(torch.nn.Conv3d(input_nc, output_nc, kernel_size=3, stride=1, padding=1))
             # model.append(torch.nn.BatchNorm3d(first_output_nc))
             model.append(torch.nn.MaxPool3d(2))
-            model.append(torch.nn.ReLU())
+            model.append(torch.nn.LeakyReLU())
             input_nc = output_nc
             output_nc *= 2
             grid_size = int(grid_size / 2)
@@ -42,12 +42,12 @@ class PrsModel(torch.nn.Module):
             input_nc = output_nc * grid_size
             for _ in range(linear_num - 1):
                 model.append(torch.nn.Linear(input_nc, int(input_nc/2)))
-                model.append(torch.nn.ReLU())
+                model.append(torch.nn.LeakyReLU())
                 input_nc = int(input_nc/2)
             
             last = torch.nn.Linear(input_nc, 4)
-            #last.weight.data = torch.zeros((4, input_nc)).float()
-            #last.bias.data = torch.tensor(plane_bias[i]).float()
+            # last.weight.data = torch.zeros((4, input_nc)).float()
+            last.bias.data = torch.tensor(plane_bias[i]).float()
             model.append(last)
             self.plane_models.append(torch.nn.Sequential(*model))
         
@@ -57,7 +57,7 @@ class PrsModel(torch.nn.Module):
             input_nc = output_nc * grid_size
             for _ in range(linear_num - 1):
                 model.append(torch.nn.Linear(input_nc, int(input_nc/2)))
-                model.append(torch.nn.ReLU())
+                model.append(torch.nn.LeakyReLU())
                 input_nc = int(input_nc/2)
             
             last = torch.nn.Linear(input_nc, 4)

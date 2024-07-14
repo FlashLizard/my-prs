@@ -81,7 +81,7 @@ class SymQuadLoss(nn.Module):
         mask = 1 - torch.gather(voxel.view(batch_num,1,-1).repeat(1,quads_num,1),
                                         2,indexs)
         distance = (points-cp)*mask.unsqueeze(3).repeat(1,1,1,3)
-        return torch.mean(torch.sum((distance*10)**4,dim=3))
+        return torch.mean(torch.sum(distance**2,dim=3))
 
 class SymPlaneLoss(nn.Module):
     def __init__(self):
@@ -101,7 +101,7 @@ class SymPlaneLoss(nn.Module):
         mask = 1 - torch.gather(voxel.view(batch_num,1,-1).repeat(1,planes_num,1),
                                         2,indexs)
         distance = (points-cp)*mask.unsqueeze(3).repeat(1,1,1,3)
-        return torch.mean(torch.sum((distance*10)**4,dim=3))
+        return torch.mean(torch.sum(torch.sum(distance**2,dim=3),dim=2))
     
 class ReLoss(nn.Module):
     def __init__(self):
@@ -114,7 +114,7 @@ class ReLoss(nn.Module):
         mat = torch.matmul(vectors.transpose(1, 2), vectors)
 
         loss = (mat - torch.eye(mat.shape[1]).repeat(batch_num,1,1).to(mat.device))**2
-        return torch.sum(loss)
+        return torch.mean(torch.sum(loss))
 
 class PrsLoss(nn.Module):
     def __init__(self):
@@ -127,10 +127,12 @@ class PrsLoss(nn.Module):
         batch_num = voxel.shape[0]
         closest_points = closest_points.view(batch_num,-1,3)
         # print(closest_points.shape)
-        return self.sym_quad_loss(voxel, points, closest_points, quads)*100 \
-             + self.re_loss(quads[:,1:])*0.02 \
-             + self.sym_plane_loss(voxel, points, closest_points, planes)*100 \
-             + self.re_loss(planes[:,:-1])*0.02 \
+        # self.sym_quad_loss(voxel, points, closest_points, quads) \
+        #      + self.re_loss(quads[:,1:])*0.2 \
+        return  50*self.sym_plane_loss(voxel, points, closest_points, planes) \
+             + self.re_loss(planes[:,:-1]) \
+             + 50*self.sym_quad_loss(voxel, points, closest_points, quads) \
+             + self.re_loss(quads[:,1:]) \
     
 if __name__ == '__main__':
     loss = PrsLoss()
